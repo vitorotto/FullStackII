@@ -1,5 +1,5 @@
 const validateUserDTO = (req, res, next) => {
-    const dtoFields = ["id", "name", "email", "password"];
+    const dtoFields = ["name", "email", "password"];
     console.log(dtoFields);
     const bodyFields = Object.keys(req.body);
 
