@@ -1,6 +1,5 @@
 const validateUserDTO = (req, res, next) => {
     const dtoFields = ["name", "email", "password"];
-    console.log(dtoFields);
     const bodyFields = Object.keys(req.body);
 
     // Verificar se todos os campos do DTO estão presentes
