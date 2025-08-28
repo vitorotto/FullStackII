@@ -90,7 +90,8 @@ UserRouter.put('/:id', (req, res) => {
     if (!id) res.status(404).json({ message: "Id não encontrado" });
     const newData = req.body;
     try {
-        let user = users.find(user => user.id === id);
+        let user = userService.findById(id);
+        if(!user) res.status(404).json({ message: "Usuário não encontrado" });
         user = { ...user, ...newData };
         const index = users.findIndex(i => i.id === id);
         users[index] = user;
