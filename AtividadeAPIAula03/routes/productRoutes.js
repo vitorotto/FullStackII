@@ -3,6 +3,7 @@ import express from "express";
 import products from "../db/products.js";
 import authMiddleware from "../middlewares/auth.js";
 import validateProductDTO from "../middlewares/validateProductDTO.js";
+import validateUserRole from "../middlewares/validateRole.js";
 
 const ProductRouter = express.Router();
 
@@ -22,36 +23,6 @@ class ProductService {
 }
 
 const productService = new ProductService;
-
-ProductRouter.use(authMiddleware);
-
-// Rota para criar produto
-ProductRouter.post('/', validateProductDTO, (req, res) => {
-    const data = { ...req.body };
-
-    // Verificando se o produto já existe
-    const existingProduct = productService.findByName(data.name)
-    if (existingProduct) res.status(400).json({ message: "Nome já cadastrado!" });
-
-    const id = products.length + 1;
-    const duplicateId = productService.findById(data.id);
-    console.log(duplicateId)
-    if (duplicateId) {
-        while (duplicateId) {
-            id++;
-        }
-    }
-    console.log(id)
-    const product = {...data, id: id.toString()};
-
-    try {
-        products.push(product);
-        res.status(201).json({ message: 'Produto criado com sucesso', product: product });
-    } catch (error) {
-        console.error(error);
-        res.status(500).json({ message: 'Erro interno no servidor' });
-    }
-})
 
 // Rota para buscar produto pelo ID
 ProductRouter.get('/:id', (req, res) => {
@@ -76,6 +47,35 @@ ProductRouter.get('/', (req, res) => {
     } catch (error) {
         console.error(error);
         res.status(500).json({ message: "Houve algum erro no servidor" });
+    }
+})
+
+ProductRouter.use(authMiddleware, validateUserRole);
+
+// Rota para criar produto
+ProductRouter.post('/', validateProductDTO, (req, res) => {
+    const data = { ...req.body };
+
+    // Verificando se o produto já existe
+    const existingProduct = productService.findByName(data.name)
+    if (existingProduct) res.status(400).json({ message: "Nome já cadastrado!" });
+
+    const id = products.length + 1;
+    // Aumentar o número do id enquanto existir um valor igual
+    let currentId = id;
+    while (productService.findById(currentId.toString())) {
+        currentId++;
+    }
+
+    console.log(id)
+    const product = {...data, id: currentId.toString()};
+
+    try {
+        products.push(product);
+        res.status(201).json({ message: 'Produto criado com sucesso', product: product });
+    } catch (error) {
+        console.error(error);
+        res.status(500).json({ message: 'Erro interno no servidor' });
     }
 })
 
