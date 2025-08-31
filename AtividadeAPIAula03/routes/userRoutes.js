@@ -3,6 +3,7 @@ import jwt from "jsonwebtoken";
 
 import users from "../db/users.js";
 import authMiddleware from "../middlewares/auth.js";
+import validateUserRole from "../middlewares/validateRole.js";
 import validateUserDTO from "../middlewares/validateUserDTO.js";
 
 const UserRouter = express.Router();
@@ -85,7 +86,7 @@ UserRouter.get('/', (req, res) => {
 })
 
 // Rota para atualizar os dados do usuário
-UserRouter.put('/:id', (req, res) => {
+UserRouter.put('/:id', validateUserRole, (req, res) => {
     const id = req.params.id;
     if (!id) res.status(404).json({ message: "Id não encontrado" });
     const newData = req.body;
@@ -103,7 +104,7 @@ UserRouter.put('/:id', (req, res) => {
 })
 
 // Rota para deletar usuário
-UserRouter.delete('/:id', (req, res) => {
+UserRouter.delete('/:id', validateUserRole, (req, res) => {
     const id = req.params.id;
 
     try {
