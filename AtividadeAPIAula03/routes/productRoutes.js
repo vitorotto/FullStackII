@@ -21,12 +21,36 @@ class ProductService {
         products.splice(index, 1);
     };
 
-    findByFilter(products, stringField, filter) {
-        return products.filter(pr => pr.stringField.toLowerCase().includes(filter.toLowerCase()));
+    findByFilter(stringField, filter) {
+        return products.filter(pr => pr[stringField].toString().toLowerCase().includes(filter));
     }
 }
 
 const productService = new ProductService;
+
+// Rota para aplicar filtros
+ProductRouter.get('/filter', (req, res) => {
+    const filterName = req.query.name;
+    console.log(filterName);
+    const filterPrice = req.query.price;
+    const filterQuant = req.query.quant;
+
+    // Aplicando filtros se eles existirem
+    let filteredProducts = [...products];
+    console.log(filteredProducts);
+
+    if (filterName) {
+        filteredProducts = productService.findByFilter("name", filterName.toLowerCase());
+        console.log(filteredProducts);
+        res.status(200).json({ products: filteredProducts });
+    }
+    if (filterPrice) {
+        filteredProducts = productService.findByFilter("price", filterPrice.toLowerCase());
+    }
+    if (filterQuant) {
+        filteredProducts = productService.findByFilter("qnt", filterQuant.toLowerCase());
+    }
+})
 
 // Rota para buscar produto pelo ID
 ProductRouter.get('/:id', (req, res) => {
@@ -114,29 +138,6 @@ ProductRouter.delete('/:id', (req, res) => {
         console.error(error);
         res.status(500).json({ message: "Erro interno no servidor" })
     }
-})
-
-// Rota para aplicar filtros
-ProductRouter.get('/filter', (req, res) => {
-    const filterName = req.query.name;
-    const filterPrice = req.query.price;
-    const filterQuant = req.query.quant;
-
-    // Aplicando filtros se eles existirem
-    let filteredProducts = [...products];
-
-    if (filterName) {
-        filteredProducts = productService.findByFilter(filteredProducts, "name", filterName);
-        console.log(filteredProducts);
-    }
-    if (filterPrice) {
-        filteredProducts = productService.findByFilter(filteredProducts, "price", filterPrice);
-    }
-    if (filterQuant) {
-        filteredProducts = productService.findByFilter(filteredProducts, "qnt", filterQuant);
-    }
-
-    res.status(200).json({ products: filteredProducts });
 })
 
 export default ProductRouter;
