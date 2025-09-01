@@ -20,6 +20,10 @@ class ProductService {
         const index = products.findIndex(p => p.id === id);
         products.splice(index, 1);
     };
+
+    findByFilter(products, stringField, filter) {
+        return products.filter(pr => pr.stringField.toLowerCase().includes(filter.toLowerCase()));
+    }
 }
 
 const productService = new ProductService;
@@ -110,6 +114,29 @@ ProductRouter.delete('/:id', (req, res) => {
         console.error(error);
         res.status(500).json({ message: "Erro interno no servidor" })
     }
+})
+
+// Rota para aplicar filtros
+ProductRouter.get('/filter', (req, res) => {
+    const filterName = req.query.name;
+    const filterPrice = req.query.price;
+    const filterQuant = req.query.quant;
+
+    // Aplicando filtros se eles existirem
+    let filteredProducts = [...products];
+
+    if (filterName) {
+        filteredProducts = productService.findByFilter(filteredProducts, "name", filterName);
+        console.log(filteredProducts);
+    }
+    if (filterPrice) {
+        filteredProducts = productService.findByFilter(filteredProducts, "price", filterPrice);
+    }
+    if (filterQuant) {
+        filteredProducts = productService.findByFilter(filteredProducts, "qnt", filterQuant);
+    }
+
+    res.status(200).json({ products: filteredProducts });
 })
 
 export default ProductRouter;
