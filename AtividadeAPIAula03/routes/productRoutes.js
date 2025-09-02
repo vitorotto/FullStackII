@@ -20,10 +20,6 @@ class ProductService {
         const index = products.findIndex(p => p.id === id);
         products.splice(index, 1);
     };
-
-    findByFilter(stringField, filter) {
-        return products.filter(pr => pr[stringField].toString().toLowerCase().includes(filter));
-    }
 }
 
 const productService = new ProductService;
@@ -31,25 +27,33 @@ const productService = new ProductService;
 // Rota para aplicar filtros
 ProductRouter.get('/filter', (req, res) => {
     const filterName = req.query.name;
-    console.log(filterName);
-    const filterPrice = req.query.price;
+    const moreExpensive = req.query.moreExpensive
+    const moreCheaper = req.query.moreCheaper
     const filterQuant = req.query.quant;
 
     // Aplicando filtros se eles existirem
     let filteredProducts = [...products];
-    console.log(filteredProducts);
 
     if (filterName) {
-        filteredProducts = productService.findByFilter("name", filterName.toLowerCase());
-        console.log(filteredProducts);
-        res.status(200).json({ products: filteredProducts });
+        filteredProducts = filteredProducts.filter(pr => pr.name.toLowerCase().includes(filterName.toLowerCase()));
     }
-    if (filterPrice) {
-        filteredProducts = productService.findByFilter("price", filterPrice.toLowerCase());
+
+    if (moreExpensive) {
+        filteredProducts = filteredProducts.filter(pr => Number(pr.price) >= moreExpensive);
     }
+
+    if (moreCheaper) {
+        filteredProducts = filteredProducts.filter(pr => Number(pr.price) <= moreCheaper);
+    }
+
     if (filterQuant) {
-        filteredProducts = productService.findByFilter("qnt", filterQuant.toLowerCase());
+        filteredProducts = filteredProducts.filter(pr => Number(pr.qnt) <= filterQuant);
     }
+
+    if (filteredProducts.length === 0) 
+        res.status(404).json({ message: "Lamentamos, mas nenhum produto foi encontrado" })
+    else
+        res.status(200).json({ products: filteredProducts });
 })
 
 // Rota para buscar produto pelo ID
@@ -96,7 +100,7 @@ ProductRouter.post('/', validateProductDTO, (req, res) => {
     }
 
     console.log(id)
-    const product = {...data, id: currentId.toString()};
+    const product = { ...data, id: currentId.toString() };
 
     try {
         products.push(product);
@@ -114,7 +118,7 @@ ProductRouter.put('/:id', (req, res) => {
     const newData = req.body;
     try {
         let product = productService.findById(id);
-        if(!product) res.status(404).json({ message: "Produto não encontrado" });
+        if (!product) res.status(404).json({ message: "Produto não encontrado" });
         product = { ...product, ...newData };
         const index = products.findIndex(i => i.id === id);
         products[index] = product;
