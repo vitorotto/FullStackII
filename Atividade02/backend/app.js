@@ -17,12 +17,6 @@ app.use(cors({
   optionsSuccessStatus: 200 // Para suporte a navegadores legados
 }));
 
-// Middleware para debug das requisições
-app.use((req, res, next) => {
-  console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${req.get('Origin') || 'N/A'}`);
-  next();
-});
-
 app.use(express.json());
 
 app.get('/', (req, res) => {
