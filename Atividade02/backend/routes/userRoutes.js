@@ -29,9 +29,9 @@ const userService = new UserService;
 UserRouter.post('/login', (req, res) => {
     const { email, password } = req.body
     const user = userService.findByEmail(email);
-    if (!user) res.status(401).json({ message: "Email inválido" });
+    if (!user) return res.status(401).json({ message: "Email inválido" });
     if (password != user.password) {
-        res.status(401).json({ message: "Senha inválida" });
+        return res.status(401).json({ message: "Senha inválida" });
     }
     const token = jwt.sign({ id: user.id, role: user.role }, process.env.JWT_SECRET, { expiresIn: '1h' });
     res.status(200).json({ message: "Login realizado", user: user, token: token });
@@ -43,7 +43,7 @@ UserRouter.post('/', validateUserDTO, (req, res) => {
 
     // Verificando se o usuário já existe
     const existingUser = userService.findByEmail(data.email)
-    if (existingUser) res.status(400).json({ message: "Email já cadastrado!" });
+    if (existingUser) return res.status(400).json({ message: "Email já cadastrado!" });
 
     const id = users.length + 1;
     const user = {...data, role: 'user', id: id.toString()};

@@ -8,15 +8,21 @@ const port = 5432;
 
 const app = express();
 
-// Configuração do CORS
-const corsOptions = {
-  origin: ['http://localhost:3000', 'http://localhost:3001'], // Permite requisições do frontend React
+// Configuração do CORS mais permissiva para desenvolvimento
+app.use(cors({
+  origin: true, // Permite qualquer origem em desenvolvimento
+  credentials: true,
   methods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
-  allowedHeaders: ['Content-Type', 'Authorization'],
-  credentials: true // Permite cookies e headers de autenticação
-};
+  allowedHeaders: ['Content-Type', 'Authorization', 'X-Requested-With'],
+  optionsSuccessStatus: 200 // Para suporte a navegadores legados
+}));
 
-app.use(cors(corsOptions));
+// Middleware para debug das requisições
+app.use((req, res, next) => {
+  console.log(`${new Date().toISOString()} - ${req.method} ${req.path} - Origin: ${req.get('Origin') || 'N/A'}`);
+  next();
+});
+
 app.use(express.json());
 
 app.get('/', (req, res) => {
